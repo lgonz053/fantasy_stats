@@ -1,8 +1,8 @@
-### Fantasy Stats
+## Fantasy Stats
 
 This project is to help individuals simplify player stats to make informed decisions on who to draft/start.
 
-## Fatansy Basketball
+### Fatansy Basketball
 
 NBA player information will be displayed as follows - 
 
@@ -16,7 +16,7 @@ NBA player information will be displayed as follows -
 - Blocks
 - Turnovers
 
-## How to start project locally
+### How to start project locally
 
 Make sure to clone and fork the repo locally. Then run
 
