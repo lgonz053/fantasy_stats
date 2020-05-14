@@ -17,7 +17,6 @@ def load_more():
     run = True
 
     while run:
-        print('we are inside the while loop')
         try:
             print('this is running something')
             load_more_bttn = driver.find_element_by_link_text('Show More')
@@ -27,21 +26,21 @@ def load_more():
         except Exception as e:
             print(e)
             break
-    print("Complete")
+    page_source = driver.page_source
+    get_players(page_source)
     time.sleep(10)
     driver.quit()
 
-def get_html():
-    url = 'https://www.espn.com/nba/stats/player/_/table/offensive/sort/avgPoints/dir/desc'
-    response = requests.get(url)
-    espn_html = bs(response.text, 'html.parser')
-    return espn_html
+def get_players(page_source):
+    # espn_html = bs(page_source, 'html.parser')
+    # return espn_html
+    print(page_source)
 
-def get_names():
-    espn_html = get_html()
-    player_tag = espn_html.select('div > a')
-    for names in player_tag:
-        names = names.get_text()
-        print(names)
+# def get_names():
+#     espn_html = get_players()
+#     player_tag = espn_html.select('div > a')
+#     for names in player_tag:
+#         names = names.get_text()
+#         print(names)
 
 load_more()
