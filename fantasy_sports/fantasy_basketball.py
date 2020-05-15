@@ -10,7 +10,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-driver = webdriver.Chrome('/Users/leonardogonzalez/src/fantasy_stats/chromedriver/chromedriver')
+DRIVER_ROOT = os.path.abspath(os.path.join(__file__, "../../chromedriver/chromedriver"))
+
+driver = webdriver.Chrome(DRIVER_ROOT)
 driver.get('https://www.espn.com/nba/stats/player/_/table/offensive/sort/avgPoints/dir/desc')
 
 def load_more():
@@ -43,4 +45,5 @@ def get_players(page_source):
 #         names = names.get_text()
 #         print(names)
 
-load_more()
+if __name__ == "__main__":
+    load_more()
