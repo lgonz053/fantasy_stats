@@ -12,7 +12,12 @@ from selenium.webdriver.support import expected_conditions as EC
 
 DRIVER_ROOT = os.path.abspath(os.path.join(__file__, "../../chromedriver/chromedriver"))
 
-driver = webdriver.Chrome(DRIVER_ROOT)
+options = webdriver.ChromeOptions()
+options.add_argument('--ignore-certificate-errors')
+options.add_argument('--incognito')
+options.add_argument('--headless')
+
+driver = webdriver.Chrome(DRIVER_ROOT, chrome_options=options)
 driver.get('https://www.espn.com/nba/stats/player/_/table/offensive/sort/avgPoints/dir/desc')
 
 def load_more():
@@ -34,13 +39,16 @@ def load_more():
     driver.quit()
 
 def get_players(page_source):
-    # espn_html = bs(page_source, 'html.parser')
+    espn_html = bs(page_source, 'html.parser')
+    print(espn_html)
     # return espn_html
-    print(page_source)
 
 # def get_names():
 #     espn_html = get_players()
 #     player_tag = espn_html.select('div > a')
+#     print(len(player_tag))
+#     print("**************************")
+#     print(player_tag)
 #     for names in player_tag:
 #         names = names.get_text()
 #         print(names)
