@@ -4,8 +4,8 @@ import time
 import webbrowser
 
 from bs4 import BeautifulSoup as bs
-from selenium import webdriver      
-from selenium.common.exceptions import NoSuchElementException
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -18,40 +18,32 @@ options.add_argument('--incognito')
 options.add_argument('--headless')
 
 driver = webdriver.Chrome(DRIVER_ROOT, chrome_options=options)
-driver.get('https://www.espn.com/nba/stats/player/_/table/offensive/sort/avgPoints/dir/desc')
 
-def load_more():
-    run = True
 
-    while run:
+def load_more_data():
+    driver.get(
+        "https://www.espn.com/nba/stats/player/_/table/offensive/sort/avgPoints/dir/desc"
+    )
+    while True:
         try:
-            print('this is running something')
-            load_more_bttn = driver.find_element_by_link_text('Show More')
-            time.sleep(2)
+            load_more_bttn = driver.find_element_by_link_text("Show More")
             load_more_bttn.click()
-            time.sleep(5)
+            print("Loading data...")
+            time.sleep(3)
         except Exception as e:
             print(e)
             break
-    page_source = driver.page_source
-    get_players(page_source)
+    print("Complete!")
     time.sleep(10)
+    parsed_html = bs(driver.page_source, "html.parser")
+    get_names(parsed_html)
     driver.quit()
 
-def get_players(page_source):
-    espn_html = bs(page_source, 'html.parser')
-    print(espn_html)
-    # return espn_html
-
-# def get_names():
-#     espn_html = get_players()
-#     player_tag = espn_html.select('div > a')
-#     print(len(player_tag))
-#     print("**************************")
-#     print(player_tag)
-#     for names in player_tag:
-#         names = names.get_text()
-#         print(names)
+def get_names(espn_html):
+    player_tag = espn_html.select('div > a')
+    for names in player_tag:
+        names = names.get_text()
+        print(names)
 
 if __name__ == "__main__":
-    load_more()
+    load_more_data()
