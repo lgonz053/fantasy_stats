@@ -1,4 +1,5 @@
 import os
+import re
 import requests
 import time
 import webbrowser
@@ -33,17 +34,25 @@ def load_more_data():
         except Exception as e:
             print(e)
             break
-    print("Complete!")
     time.sleep(10)
+    print("Data pull complete!")
     parsed_html = bs(driver.page_source, "html.parser")
     get_names(parsed_html)
     driver.quit()
 
 def get_names(espn_html):
-    player_tag = espn_html.select('div > a')
-    for names in player_tag:
-        names = names.get_text()
-        print(names)
+    count = 0
+    player_row = espn_html.findAll("tr", {"class":"Table__TR Table__TR--sm Table__even"})
+    print(player_row)
+    # for player in player_row:
+        # # if count < (len(player_row) / 2):
+        # try:
+        #     player_info = player.get_text()
+        #     # regex - split at number and text, string to search
+        #     name = re.match(r"([a-z]+)([0-9]+)", player_info, re.I).groups()
+        #     print(name)
+        # except:
+        #     pass
 
 if __name__ == "__main__":
     load_more_data()
