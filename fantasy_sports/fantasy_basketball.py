@@ -30,14 +30,12 @@ def load_more_data():
     )
     while True:
         try:
-            load_more_bttn = driver.find_element_by_link_text("Show More")
-            load_more_bttn.click()
+            driver.find_element_by_link_text("Show More").click()
             print("Loading data...")
             time.sleep(3)
-        except Exception as e:
-            print(e)
+        except:
+            time.sleep(10)
             break
-    time.sleep(10)
     parsed_html = bs(driver.page_source, "html.parser")
     driver.quit()
     get_player_data(parsed_html)
@@ -58,13 +56,11 @@ def get_headers(espn_html):
 def get_player_data(espn_html):
     players_data = espn_html.select("td > div > a")
     players = {}
-    idx = 0
-    for player in players_data:
+    for idx, player in enumerate(players_data):
         name = player.get_text()
         if name not in players.keys():
             players[name] = idx
-        idx += 1
-    return players
+    print(players)
 
 if __name__ == "__main__":
     load_more_data()
