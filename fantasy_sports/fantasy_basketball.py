@@ -20,6 +20,9 @@ options.add_argument('--headless')
 
 driver = webdriver.Chrome(DRIVER_ROOT, chrome_options=options)
 
+# def pull_data():
+#     espn_html = load_more_data()
+#     player_data = get_player_data(espn_html)
 
 def load_more_data():
     driver.get(
@@ -35,24 +38,33 @@ def load_more_data():
             print(e)
             break
     time.sleep(10)
-    print("Data pull complete!")
     parsed_html = bs(driver.page_source, "html.parser")
-    get_names(parsed_html)
     driver.quit()
+    get_player_data(parsed_html)
+    # get_headers(parsed_html)
+    print("Data pull complete!")
 
-def get_names(espn_html):
-    count = 0
-    player_row = espn_html.findAll("tr", {"class":"Table__TR Table__TR--sm Table__even"})
-    print(player_row)
-    # for player in player_row:
-        # # if count < (len(player_row) / 2):
-        # try:
-        #     player_info = player.get_text()
-        #     # regex - split at number and text, string to search
-        #     name = re.match(r"([a-z]+)([0-9]+)", player_info, re.I).groups()
-        #     print(name)
-        # except:
-        #     pass
+def get_headers(espn_html):
+    headers_tag = espn_html.select("thead > tr > th > span")
+    headers = []
+    for tag in headers_tag:
+        try:
+            if tag["title"] is not "":
+                headers.append(tag["title"])
+        except:
+            continue
+    return headers
+
+def get_player_data(espn_html):
+    players_data = espn_html.select("td > div > a")
+    players = {}
+    idx = 0
+    for player in players_data:
+        name = player.get_text()
+        if name not in players.keys():
+            players[name] = idx
+        idx += 1
+    return players
 
 if __name__ == "__main__":
     load_more_data()
