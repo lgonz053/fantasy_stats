@@ -1,47 +1,79 @@
 import os
+import re
 import requests
 import time
 import webbrowser
 
 from bs4 import BeautifulSoup as bs
-from selenium import webdriver      
-from selenium.common.exceptions import NoSuchElementException
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-driver = webdriver.Chrome('/Users/leonardogonzalez/src/fantasy_stats/chromedriver/chromedriver')
-driver.get('https://www.espn.com/nba/stats/player/_/table/offensive/sort/avgPoints/dir/desc')
+DRIVER_ROOT = os.path.abspath(os.path.join(__file__, "../../chromedriver/chromedriver"))
 
-def load_more():
-    run = True
+options = webdriver.ChromeOptions()
+options.add_argument('--ignore-certificate-errors')
+options.add_argument('--incognito')
+options.add_argument('--headless')
 
-    while run:
-        print('we are inside the while loop')
+driver = webdriver.Chrome(DRIVER_ROOT, chrome_options=options)
+
+def pull_data():
+    headers = get_headers(parsed_html)
+    names = get_player_names(parsed_html)
+    data = get_player_data(parsed_html)
+
+def load_more_data():
+    driver.get(
+        "https://www.espn.com/nba/stats/player/_/table/offensive/sort/avgPoints/dir/desc"
+    )
+    while True:
         try:
-            print('this is running something')
-            load_more_bttn = driver.find_element_by_link_text('Show More')
-            time.sleep(2)
-            load_more_bttn.click()
-            time.sleep(5)
-        except Exception as e:
-            print(e)
+            driver.find_element_by_link_text("Show More").click()
+            print("Loading data...")
+            time.sleep(3)
+        except:
+            time.sleep(10)
             break
-    print("Complete")
-    time.sleep(10)
+    parsed_html = bs(driver.page_source, "html.parser")
     driver.quit()
+    return parsed_html
 
-def get_html():
-    url = 'https://www.espn.com/nba/stats/player/_/table/offensive/sort/avgPoints/dir/desc'
-    response = requests.get(url)
-    espn_html = bs(response.text, 'html.parser')
-    return espn_html
+    print("Data pull complete!")
 
-def get_names():
-    espn_html = get_html()
-    player_tag = espn_html.select('div > a')
-    for names in player_tag:
-        names = names.get_text()
-        print(names)
+def get_headers(html):
+    headers_tag = html.select("thead > tr > th > span")
+    headers = []
+    for tag in headers_tag:
+        try:
+            if tag["title"] is not "":
+                headers.append(tag["title"])
+        except:
+            continue
+    return headers
 
-load_more()
+def get_player_names(html):
+    players_names = html.select("td > div > a")
+    players = {}
+    for idx, player in enumerate(players_names):
+        name = player.get_text()
+        if name not in players.keys():
+            players[name] = idx
+    return players
+
+def get_player_data(html):
+    player_data = html.select("tbody > tr")
+    player_stats = {}
+    for idx, player in enumerate(player_data):
+        if idx not in player_stats.keys():
+            data = []
+            for stats in player:
+                data.append(stats.get_text())
+            player_stats[idx] = data
+    return player_stats
+
+
+if __name__ == "__main__":
+    load_more_data()
