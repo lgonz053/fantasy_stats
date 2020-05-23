@@ -21,6 +21,7 @@ options.add_argument('--headless')
 driver = webdriver.Chrome(DRIVER_ROOT, chrome_options=options)
 
 def pull_data():
+    parsed_html = load_more_data()
     headers = get_headers(parsed_html)
     names = get_player_names(parsed_html)
     data = get_player_data(parsed_html)
@@ -39,9 +40,8 @@ def load_more_data():
             break
     parsed_html = bs(driver.page_source, "html.parser")
     driver.quit()
-    return parsed_html
-
     print("Data pull complete!")
+    return parsed_html
 
 def get_headers(html):
     headers_tag = html.select("thead > tr > th > span")
@@ -76,4 +76,4 @@ def get_player_data(html):
 
 
 if __name__ == "__main__":
-    load_more_data()
+    pull_data()
