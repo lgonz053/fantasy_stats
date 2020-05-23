@@ -20,9 +20,10 @@ options.add_argument('--headless')
 
 driver = webdriver.Chrome(DRIVER_ROOT, chrome_options=options)
 
-# def pull_data():
-#     espn_html = load_more_data()
-#     player_data = get_player_data(espn_html)
+def pull_data():
+    headers = get_headers(parsed_html)
+    names = get_player_names(parsed_html)
+    data = get_player_data(parsed_html)
 
 def load_more_data():
     driver.get(
@@ -38,12 +39,12 @@ def load_more_data():
             break
     parsed_html = bs(driver.page_source, "html.parser")
     driver.quit()
-    get_player_data(parsed_html)
-    # get_headers(parsed_html)
+    return parsed_html
+
     print("Data pull complete!")
 
-def get_headers(espn_html):
-    headers_tag = espn_html.select("thead > tr > th > span")
+def get_headers(html):
+    headers_tag = html.select("thead > tr > th > span")
     headers = []
     for tag in headers_tag:
         try:
@@ -53,14 +54,26 @@ def get_headers(espn_html):
             continue
     return headers
 
-def get_player_data(espn_html):
-    players_data = espn_html.select("td > div > a")
+def get_player_names(html):
+    players_names = html.select("td > div > a")
     players = {}
-    for idx, player in enumerate(players_data):
+    for idx, player in enumerate(players_names):
         name = player.get_text()
         if name not in players.keys():
             players[name] = idx
-    print(players)
+    return players
+
+def get_player_data(html):
+    player_data = html.select("tbody > tr")
+    player_stats = {}
+    for idx, player in enumerate(player_data):
+        if idx not in player_stats.keys():
+            data = []
+            for stats in player:
+                data.append(stats.get_text())
+            player_stats[idx] = data
+    return player_stats
+
 
 if __name__ == "__main__":
     load_more_data()
