@@ -1,3 +1,4 @@
+import csv
 import os
 import re
 import requests
@@ -24,11 +25,10 @@ driver = webdriver.Chrome(DRIVER_ROOT, chrome_options=options)
 
 def pull_data():
     parsed_html = load_more_data()
-    # headers = get_headers(parsed_html)
+    headers = get_headers(parsed_html)
     names = get_player_names(parsed_html)
     stats = get_player_stats(parsed_html, names)
-    print(stats)
-    # create_csv(headers, names, stats)
+    csv_data(headers, names, stats)
 
 
 def load_more_data():
@@ -73,7 +73,7 @@ def get_player_names(html):
 
 def get_player_stats(html, names):
     html_data = html.select("tbody > tr")
-    player_data = html_data[len(names):]
+    player_data = html_data[len(names) :]
     player_stats = {}
     for idx, player in enumerate(player_data):
         if idx not in player_stats.keys():
@@ -84,32 +84,38 @@ def get_player_stats(html, names):
     return player_stats
 
 
-# headers = ['Position ', 'Games Played', 'Minutes Per Game', 'Points Per Game', 'Average Field Goals Made', 'Average Field Goals Attempted', 'Field Goal Percentage', 'Average 3-Point Field Goals Made', 'Average 3-Point Field Goals Attempted', '3-Point Field Goal Percentage', 'Average Free Throws Made', 'Average Free Throws Attempted', 'Free Throw Percentage', 'Rebounds Per Game', 'Assists Per Game', 'Steals Per Game', 'Blocks Per Game', 'Turnovers Per Game', 'Double Double', 'Triple Double', 'Player Efficiency Rating']
-
-# what I need = Field Goal Percentage, Free Throw Percentage, Average 3-Point Field Goals Made, Points Per Game, Rebounds Per Game, Assists Per Game, Steals Per Game, Blocks Per Game, Turnovers Per Game
-
-
-def create_csv(headers, names, stats, additional_stats=None):
+def csv_data(headers, names, stats):
     fields = [
-        "Field Goal Percentage",
-        "Free Throw Percentage",
-        "Average 3-Point Field Goals Made",
+        "Name",
         "Points Per Game",
+        "Field Goal Percentage",
+        "Average 3-Point Field Goals Made",
+        "Free Throw Percentage",
         "Rebounds Per Game",
         "Assists Per Game",
         "Steals Per Game",
         "Blocks Per Game",
         "Turnovers Per Game",
     ]
+    csv_data = [fields]
 
-    # for name, idx in names.items():
-    #     stat = stats[idx]
-    #     print(stat)
-        # arr = []
-        # for s in stat:
-        #     if s in fields:
-        #         arr.append[s]
-        # print(arr)
+    for name, idx in names.items():
+        stat = stats[idx]
+        arr = [name]
+        for i, h in enumerate(headers):
+            if h in fields:
+                arr.append(stat[i])
+        csv_data.append(arr)
+    create_csv(csv_data)
+
+
+def create_csv(csv_data):
+    with open("nba_player_data.csv", "w", newline="") as csvfile:
+        writer = csv.writer(csvfile, delimiter=",", lineterminator="\n")
+        for data in csv_data:
+            writer.writerow(data)
+    print(csvfile.name)
+
 
 if __name__ == "__main__":
     pull_data()
