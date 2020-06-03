@@ -114,7 +114,6 @@ def create_csv(csv_data):
         writer = csv.writer(csvfile, delimiter=",", lineterminator="\n")
         for data in csv_data:
             writer.writerow(data)
-    print(csvfile.name)
 
 
 if __name__ == "__main__":
