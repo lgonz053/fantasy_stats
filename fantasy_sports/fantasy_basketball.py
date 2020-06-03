@@ -1,3 +1,4 @@
+import csv
 import os
 import re
 import requests
@@ -13,17 +14,22 @@ from selenium.webdriver.support import expected_conditions as EC
 
 DRIVER_ROOT = os.path.abspath(os.path.join(__file__, "../../chromedriver/chromedriver"))
 
+# We can move this to the parent class
 options = webdriver.ChromeOptions()
-options.add_argument('--ignore-certificate-errors')
-options.add_argument('--incognito')
-options.add_argument('--headless')
+options.add_argument("--ignore-certificate-errors")
+options.add_argument("--incognito")
+options.add_argument("--headless")
 
 driver = webdriver.Chrome(DRIVER_ROOT, chrome_options=options)
 
+
 def pull_data():
+    parsed_html = load_more_data()
     headers = get_headers(parsed_html)
     names = get_player_names(parsed_html)
-    data = get_player_data(parsed_html)
+    stats = get_player_stats(parsed_html, names)
+    csv_data(headers, names, stats)
+
 
 def load_more_data():
     driver.get(
@@ -39,9 +45,9 @@ def load_more_data():
             break
     parsed_html = bs(driver.page_source, "html.parser")
     driver.quit()
+    print("Data pull complete!")
     return parsed_html
 
-    print("Data pull complete!")
 
 def get_headers(html):
     headers_tag = html.select("thead > tr > th > span")
@@ -54,6 +60,7 @@ def get_headers(html):
             continue
     return headers
 
+
 def get_player_names(html):
     players_names = html.select("td > div > a")
     players = {}
@@ -63,8 +70,10 @@ def get_player_names(html):
             players[name] = idx
     return players
 
-def get_player_data(html):
-    player_data = html.select("tbody > tr")
+
+def get_player_stats(html, names):
+    html_data = html.select("tbody > tr")
+    player_data = html_data[len(names) :]
     player_stats = {}
     for idx, player in enumerate(player_data):
         if idx not in player_stats.keys():
@@ -75,5 +84,37 @@ def get_player_data(html):
     return player_stats
 
 
+def csv_data(headers, names, stats):
+    fields = [
+        "Name",
+        "Points Per Game",
+        "Field Goal Percentage",
+        "Average 3-Point Field Goals Made",
+        "Free Throw Percentage",
+        "Rebounds Per Game",
+        "Assists Per Game",
+        "Steals Per Game",
+        "Blocks Per Game",
+        "Turnovers Per Game",
+    ]
+    csv_data = [fields]
+
+    for name, idx in names.items():
+        stat = stats[idx]
+        arr = [name]
+        for i, h in enumerate(headers):
+            if h in fields:
+                arr.append(stat[i])
+        csv_data.append(arr)
+    create_csv(csv_data)
+
+
+def create_csv(csv_data):
+    with open("nba_player_data.csv", "w", newline="") as csvfile:
+        writer = csv.writer(csvfile, delimiter=",", lineterminator="\n")
+        for data in csv_data:
+            writer.writerow(data)
+
+
 if __name__ == "__main__":
-    load_more_data()
+    pull_data()
